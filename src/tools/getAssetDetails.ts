@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createGraphQLClient } from "../client/graphqlClient";
+import { createGraphQLClient } from "../client/graphqlClient.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 // Define the schema for the tool parameters

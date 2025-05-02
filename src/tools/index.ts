@@ -1,5 +1,5 @@
 // Export all tool modules from this index file
-export * from "./getAssets";
-export * from "./getAssetDetails";
-export * from "./searchAssets";
-export * from "./getSites";
+export * from "./getAssets.js";
+export * from "./getAssetDetails.js";
+export * from "./searchAssets.js";
+export * from "./getSites.js";

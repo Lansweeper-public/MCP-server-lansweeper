@@ -12,7 +12,7 @@ import {
   getSitesSchema,
   searchAssetsHandler,
   searchAssetsSchema,
-} from "./tools";
+} from "./tools/index.js";
 
 // Create server instance
 const server = new McpServer({

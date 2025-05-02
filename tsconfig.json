@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "bundler",
+    "module": "node16",
     "rootDir": "./src",
     "declaration": true,
     "outDir": "./dist",

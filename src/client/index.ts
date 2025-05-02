@@ -1,2 +1,2 @@
 // Export all client utilities from this index file
-export * from "./graphqlClient";
+export * from "./graphqlClient.js";
