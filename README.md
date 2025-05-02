@@ -2,57 +2,98 @@
 
 An MCP (Model Context Protocol) server for querying the Lansweeper API.
 
-## Installation
-
-You can install this package from npm:
-
-```bash
-# Using npm
-npm install @lansweeper-public/mcp-server-lansweeper
-
-# Using yarn
-yarn add @lansweeper-public/mcp-server-lansweeper
-```
-
-## Overview
-
-This MCP server provides a standardized interface to interact with the Lansweeper API, allowing you to query asset information, search assets, and retrieve site details.
-
 ## Prerequisites
 
 - Node.js (v16 or later)
 - Lansweeper account with API access
+- Lansweeper Personal Access Token - follow the instructions in the [Lansweeper Data API documentation](https://developer.lansweeper.com/docs/data-api/get-started/quickstart#personal-access-token-pat) to generate your token
 
-## Configuration
+## Installation
 
-The server requires a Lansweeper Personal Access Token to authenticate with the API. Set it as an environment variable:
+### Cursor
+
+Add the following to your Cursor MCP config:
+
+```json
+{
+  "mcpServers": {
+    "lansweeper-mcp-server": {
+      "command": "npx",
+      "args": ["-y", "@lansweeper-public/mcp-server-lansweeper"],
+      "env": {
+        "LANSWEEPER_PERSONAL_ACCESS_TOKEN": "your-lansweeper-token"
+      }
+    }
+  }
+}
+```
+
+### VS Code
+
+To install Lansweeper MCP Server for VS Code, add the following to your `.vscode/mcp.json` file:
+
+```json
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "lansweeper-token",
+      "description": "Lansweeper Personal Access Token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "lansweeper-mcp-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@lansweeper-public/mcp-server-lansweeper"],
+      "env": {
+        "LANSWEEPER_PERSONAL_ACCESS_TOKEN": "${input:lansweeper-token}"
+      }
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+Add the following to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "lansweeper-mcp-server": {
+      "command": "npx",
+      "args": ["-y", "@lansweeper-public/mcp-server-lansweeper"],
+      "env": {
+        "LANSWEEPER_PERSONAL_ACCESS_TOKEN": "your-lansweeper-token"
+      }
+    }
+  }
+}
+```
+
+This file is located at:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+### Claude Code
+
+After installing Claude Code, run the following command:
 
 ```bash
-export LANSWEEPER_PERSONAL_ACCESS_TOKEN=your_token_here
+claude mcp add lansweeper-mcp-server -e LANSWEEPER_PERSONAL_ACCESS_TOKEN=your-lansweeper-token -- npx -y @lansweeper-public/mcp-server-lansweeper
 ```
 
-For persistent configuration, add this to your `.bashrc`, `.zshrc`, or equivalent shell configuration file.
+### Direct Usage
 
-## Usage
-
-### As a dependency in your project
-
-```javascript
-import { startServer } from '@lansweeper-public/mcp-server-lansweeper';
-
-// Start the server
-startServer();
-```
-
-### As a standalone server
-
-Start the server:
+You can also run the server directly using npx:
 
 ```bash
-npx @lansweeper-public/mcp-server-lansweeper
+LANSWEEPER_PERSONAL_ACCESS_TOKEN=your-lansweeper-token npx -y @lansweeper-public/mcp-server-lansweeper
 ```
 
-### Available Tools
+## Available Tools
 
 The MCP server provides the following tools:
 

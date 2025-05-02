@@ -6,6 +6,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   getAssetDetailsHandler,
   getAssetDetailsSchema,
+  getAssetsHandler,
+  getAssetsSchema,
   getSitesHandler,
   getSitesSchema,
   searchAssetsHandler,
@@ -26,7 +28,7 @@ const server = new McpServer({
 });
 
 // Register Lansweeper tools
-server.tool("get-assets", "Get assets from Lansweeper", getAssetDetailsSchema, getAssetDetailsHandler);
+server.tool("get-assets", "Get assets from Lansweeper", getAssetsSchema, getAssetsHandler);
 server.tool(
   "get-asset-details",
   "Get detailed information about a specific asset",
@@ -45,7 +47,7 @@ server.tool("get-sites", "Get list of Lansweeper sites", getSitesSchema, getSite
 export { server };
 
 // Export a function to start the server
-export async function startServer() {
+export async function startServer(): Promise<void> {
   // Check for environment variable at startup
   if (!LANSWEEPER_PERSONAL_ACCESS_TOKEN) {
     console.error("Error: LANSWEEPER_PERSONAL_ACCESS_TOKEN environment variable is not set");

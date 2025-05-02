@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createGraphQLClient } from "../client/graphqlClient";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 // Define interfaces for the GraphQL response
 interface AssetBasicInfo {
@@ -40,14 +41,16 @@ export const searchAssetsSchema = {
   limit: z.number().optional().describe("Maximum number of results to return (default: 10)"),
 };
 
-// Define the type for the schema parameters
-export type SearchAssetsParams = {
-  query: string;
-  limit?: number;
-};
-
 // Implementation of the search-assets tool
-export const searchAssetsHandler = async ({ query, limit = 10 }: SearchAssetsParams) => {
+export const searchAssetsHandler = async ({
+  query,
+  limit = 10,
+}: z.infer<
+  z.ZodSchema<{
+    query: string;
+    limit?: number;
+  }>
+>): Promise<CallToolResult> => {
   // Build GraphQL query
   const gqlQuery = `
     query SearchAssets {

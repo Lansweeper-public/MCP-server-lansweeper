@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createGraphQLClient } from "../client/graphqlClient";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 // Define interfaces for the GraphQL response
 interface AssetBasicInfo {
@@ -28,7 +29,7 @@ interface AssetState {
   name: string;
 }
 
-interface AssetDetailsData {
+interface AssetDetails {
   asset: {
     id: string;
     key: string;
@@ -47,13 +48,10 @@ export const getAssetDetailsSchema = {
   assetId: z.string().describe("ID of the asset to retrieve"),
 };
 
-// Define the type for the schema parameters
-export type GetAssetDetailsParams = {
-  assetId: string;
-};
-
 // Implementation of the get-asset-details tool
-export const getAssetDetailsHandler = async ({ assetId }: GetAssetDetailsParams) => {
+export const getAssetDetailsHandler = async ({
+  assetId,
+}: z.infer<z.ZodSchema<{ assetId: string }>>): Promise<CallToolResult> => {
   // Build GraphQL query
   const query = `
     query GetAssetDetails {
@@ -91,7 +89,7 @@ export const getAssetDetailsHandler = async ({ assetId }: GetAssetDetailsParams)
 
   try {
     const client = createGraphQLClient();
-    const data = await client.request<AssetDetailsData>(query);
+    const data = await client.request<AssetDetails>(query);
 
     return {
       content: [

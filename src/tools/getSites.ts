@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createGraphQLClient } from "../client/graphqlClient";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 // Define interfaces for the GraphQL response
 interface SiteNode {
@@ -31,13 +32,14 @@ export const getSitesSchema = {
   limit: z.number().optional().describe("Maximum number of sites to return (default: 100)"),
 };
 
-// Define the type for the schema parameters
-export type GetSitesParams = {
-  limit?: number;
-};
-
 // Implementation of the get-sites tool
-export const getSitesHandler = async ({ limit = 100 }: GetSitesParams) => {
+export const getSitesHandler = async ({
+  limit = 100,
+}: z.infer<
+  z.ZodSchema<{
+    limit?: number;
+  }>
+>): Promise<CallToolResult> => {
   // Build GraphQL query
   const query = `
     query GetSites {

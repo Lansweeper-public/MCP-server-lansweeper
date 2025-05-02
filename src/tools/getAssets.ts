@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createGraphQLClient } from "../client/graphqlClient";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 // Define interfaces for the GraphQL response
 interface AssetBasicInfo {
@@ -44,14 +45,16 @@ export const getAssetsSchema = {
   filter: z.string().optional().describe("Filter expression (GraphQL filter syntax)"),
 };
 
-// Define the type for the schema parameters
-export type GetAssetsParams = {
-  limit?: number;
-  filter?: string;
-};
-
 // Implementation of the get-assets tool
-export const getAssetsHandler = async ({ limit = 10, filter }: GetAssetsParams) => {
+export const getAssetsHandler = async ({
+  limit = 10,
+  filter,
+}: z.infer<
+  z.ZodSchema<{
+    limit?: number;
+    filter?: string;
+  }>
+>): Promise<CallToolResult> => {
   // Build GraphQL query
   const query = `
     query GetAssets {
