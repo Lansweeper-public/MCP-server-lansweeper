@@ -1,6 +1,6 @@
 {
   "name": "@lansweeper-public/mcp-server-lansweeper",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "MCP server for Lansweeper API integration",
   "main": "dist/index.js",
   "type": "module",
