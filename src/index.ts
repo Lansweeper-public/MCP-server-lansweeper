@@ -1,6 +1,15 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+// Get version from package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf8"));
+const version = packageJson.version;
 
 // Import tool schemas and handlers using the index files
 import {
@@ -17,7 +26,7 @@ import {
 // Create server instance
 const server = new McpServer({
   name: "mcp-server-lansweeper",
-  version: "1.0.0",
+  version,
   capabilities: {
     resources: {},
     tools: {},
@@ -41,7 +50,7 @@ server.tool(
 server.tool("get-sites", "Get list of Lansweeper sites", getSitesSchema, getSitesHandler);
 
 // Export a function to start the server
-export async function startServer(): Promise<void> {
+async function startServer(): Promise<void> {
   // Check for environment variable at startup
   if (!process.env.LANSWEEPER_PERSONAL_ACCESS_TOKEN) {
     console.error("Error: LANSWEEPER_PERSONAL_ACCESS_TOKEN environment variable is not set");
