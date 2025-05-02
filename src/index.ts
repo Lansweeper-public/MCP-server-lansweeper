@@ -14,12 +14,9 @@ import {
   searchAssetsSchema,
 } from "./tools";
 
-// Lansweeper API environment variable
-const LANSWEEPER_PERSONAL_ACCESS_TOKEN = process.env.LANSWEEPER_PERSONAL_ACCESS_TOKEN;
-
 // Create server instance
 const server = new McpServer({
-  name: "lansweeper-api",
+  name: "mcp-server-lansweeper",
   version: "1.0.0",
   capabilities: {
     resources: {},
@@ -43,13 +40,10 @@ server.tool(
 );
 server.tool("get-sites", "Get list of Lansweeper sites", getSitesSchema, getSitesHandler);
 
-// Export the server for use as a dependency
-export { server };
-
 // Export a function to start the server
 export async function startServer(): Promise<void> {
   // Check for environment variable at startup
-  if (!LANSWEEPER_PERSONAL_ACCESS_TOKEN) {
+  if (!process.env.LANSWEEPER_PERSONAL_ACCESS_TOKEN) {
     console.error("Error: LANSWEEPER_PERSONAL_ACCESS_TOKEN environment variable is not set");
     console.error("Please set the environment variable before starting the server:");
     console.error("  export LANSWEEPER_PERSONAL_ACCESS_TOKEN=your_token_here");
