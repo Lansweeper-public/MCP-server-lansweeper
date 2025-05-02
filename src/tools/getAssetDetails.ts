@@ -2,86 +2,136 @@ import { z } from "zod";
 import { createGraphQLClient } from "../client/graphqlClient";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
-// Define interfaces for the GraphQL response
-interface AssetBasicInfo {
-  ipAddress?: string;
-  macAddress?: string;
-  domain?: string;
-  operatingSystem?: string;
-  manufacturer?: string;
-  model?: string;
-  serialNumber?: string;
-  lastSeen?: string;
-  fqdn?: string;
-}
-
-interface AssetCustomField {
-  name: string;
-  value: string;
-}
-
-interface AssetSite {
-  id: string;
-  name: string;
-}
-
-interface AssetState {
-  name: string;
-}
-
-interface AssetDetails {
-  asset: {
-    id: string;
-    key: string;
-    name: string;
-    type: string;
-    url: string;
-    assetBasicInfo?: AssetBasicInfo;
-    assetCustomFields?: AssetCustomField[];
-    site?: AssetSite;
-    state?: AssetState;
-  };
-}
-
 // Define the schema for the tool parameters
 export const getAssetDetailsSchema = {
-  assetId: z.string().describe("ID of the asset to retrieve"),
+  siteId: z.string().describe("ID of the site containing the asset"),
+  assetKey: z.string().describe("Key of the asset to retrieve details for"),
+  fields: z
+    .array(z.string())
+    .optional()
+    .describe("Optional list of specific fields to request. If not provided, a default set of fields will be used."),
 };
 
 // Implementation of the get-asset-details tool
 export const getAssetDetailsHandler = async ({
-  assetId,
-}: z.infer<z.ZodSchema<{ assetId: string }>>): Promise<CallToolResult> => {
-  // Build GraphQL query
-  const query = `
-    query GetAssetDetails {
-      asset(id: "${assetId}") {
-        id
-        key
-        name
-        type
-        url
-        assetBasicInfo {
-          ipAddress
-          macAddress
-          domain
-          operatingSystem
+  siteId,
+  assetKey,
+  fields = [], // Default to empty array if not provided
+}: z.infer<
+  z.ZodSchema<{
+    siteId: string;
+    assetKey: string;
+    fields?: string[];
+  }>
+>): Promise<CallToolResult> => {
+  // Define default fields to query if none specified
+  const defaultFields = [
+    "assetBasicInfo",
+    "assetCustom",
+    "operatingSystem",
+    "processors",
+    "logicalDisks",
+    "networkAdapters",
+    "softwares",
+  ];
+
+  // Use user-specified fields or defaults
+  const fieldsToQuery = fields.length > 0 ? fields : defaultFields;
+
+  // Build dynamic query based on requested fields
+  const buildFieldQuery = (field: string): string => {
+    switch (field) {
+      case "assetCustom":
+        return `assetCustom {
+          purchaseDate
+          warrantyDate
+          lastPatched
           manufacturer
           model
           serialNumber
-          lastSeen
+          location
+          department
+          comment
+          fields {
+            value
+            fieldKey
+            name
+          }
+          stateKey
+        }`;
+      case "operatingSystem":
+        return `operatingSystem {
+          caption
+          version
+          buildNumber
+          servicePackMajorVersion
+          installDate
+          registeredUser
+        }`;
+      case "processors":
+        return `processors {
+          manufacturer
+          name
+          model
+          numberOfCores
+          numberOfLogicalProcessors
+          currentClockSpeed
+          maxClockSpeed
+        }`;
+      case "logicalDisks":
+        return `logicalDisks {
+          caption
+          description
+          fileSystem
+          freeSpace
+          size
+          volumeName
+        }`;
+      case "networkAdapters":
+        return `networkAdapters {
+          macAddress
+          manufacturer
+          name
+          speed
+        }`;
+      case "softwares":
+        return `softwares {
+          name
+          publisher
+          version
+          installDate
+        }`;
+      case "assetBasicInfo":
+      default:
+        return `assetBasicInfo {
+          name
+          domain
+          description
+          firstSeen
           fqdn
-        }
-        assetCustomFields {
-          name
-          value
-        }
-        site {
-          id
-          name
-        }
-        state {
-          name
+          ipAddress
+          mac
+          lastSeen
+          type
+          subType
+          typeGroup
+          cloudCategory
+          cloudProvider
+          cloudRegion
+          lastUpdated
+        }`;
+    }
+  };
+
+  // Build the fields part of the query
+  const fieldsQuery = fieldsToQuery.map(buildFieldQuery).join("\n");
+
+  // Build the complete GraphQL query
+  const query = `
+    query GetAssetDetails {
+      site(id: "${siteId}") {
+        assetDetails(key: "${assetKey}") {
+          ${fieldsQuery}
         }
       }
     }
@@ -89,13 +139,13 @@ export const getAssetDetailsHandler = async ({
 
   try {
     const client = createGraphQLClient();
-    const data = await client.request<AssetDetails>(query);
+    const response = await client.request(query);
 
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify([data.asset], null, 2),
+          text: JSON.stringify(response, null, 2),
         },
       ],
     };
@@ -104,7 +154,7 @@ export const getAssetDetailsHandler = async ({
       content: [
         {
           type: "text",
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+          text: `Error fetching asset details: ${error instanceof Error ? error.message : String(error)}`,
         },
       ],
     };

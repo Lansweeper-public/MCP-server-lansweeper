@@ -61,11 +61,7 @@ export async function startServer(): Promise<void> {
   console.error("Lansweeper MCP Server running on stdio");
 }
 
-// Direct invocation (when run as an ES module)
-if (process.argv[1] === import.meta.url) {
-  // This runs when the file is executed directly
-  startServer().catch((error) => {
-    console.error("Fatal error in main():", error);
-    process.exit(1);
-  });
-}
+startServer().catch((error) => {
+  console.error("Fatal error in main():", error);
+  process.exit(1);
+});
