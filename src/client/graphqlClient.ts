@@ -7,7 +7,7 @@ const LANSWEEPER_API_BASE = "https://api.lansweeper.com/api/integrations/graphql
 const LANSWEEPER_PERSONAL_ACCESS_TOKEN = process.env.LANSWEEPER_PERSONAL_ACCESS_TOKEN;
 
 // Create a GraphQL client instance with token authentication
-export function createGraphQLClient() {
+export function createGraphQLClient(): GraphQLClient {
   if (!LANSWEEPER_PERSONAL_ACCESS_TOKEN) {
     throw new Error("LANSWEEPER_PERSONAL_ACCESS_TOKEN environment variable is not set");
   }

@@ -15,12 +15,12 @@ const version = packageJson.version;
 import {
   getAssetDetailsHandler,
   getAssetDetailsSchema,
-  getAssetsHandler,
-  getAssetsSchema,
-  getSitesHandler,
-  getSitesSchema,
-  searchAssetsHandler,
-  searchAssetsSchema,
+  // getAssetsHandler,
+  // getAssetsSchema,
+  // getSitesHandler,
+  // getSitesSchema,
+  // searchAssetsHandler,
+  // searchAssetsSchema,
 } from "./tools/index.js";
 
 // Create server instance
@@ -34,20 +34,20 @@ const server = new McpServer({
 });
 
 // Register Lansweeper tools
-server.tool("get-assets", "Get assets from Lansweeper", getAssetsSchema, getAssetsHandler);
 server.tool(
   "get-asset-details",
   "Get detailed information about a specific asset",
   getAssetDetailsSchema,
   getAssetDetailsHandler,
 );
-server.tool(
-  "search-assets",
-  "Search for assets by name, IP address, or other criteria",
-  searchAssetsSchema,
-  searchAssetsHandler,
-);
-server.tool("get-sites", "Get list of Lansweeper sites", getSitesSchema, getSitesHandler);
+// server.tool("get-assets", "Get assets from Lansweeper", getAssetsSchema, getAssetsHandler);
+// server.tool(
+//   "search-assets",
+//   "Search for assets by name, IP address, or other criteria",
+//   searchAssetsSchema,
+//   searchAssetsHandler,
+// );
+// server.tool("get-sites", "Get list of Lansweeper sites", getSitesSchema, getSitesHandler);
 
 // Export a function to start the server
 async function startServer(): Promise<void> {
