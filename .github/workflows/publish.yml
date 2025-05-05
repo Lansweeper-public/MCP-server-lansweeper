@@ -15,13 +15,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Generate GitHub App token
         id: generate-token
-        uses: tibdex/github-app-token@v1
+        uses: tibdex/github-app-token@v2
         with:
           app_id: ${{ secrets.LANSWEEPER_BOT_APP_ID }}
           private_key: ${{ secrets.LANSWEEPER_BOT_PRIVATE_KEY }}
+          repositories: >-
+            [
+              "${{ github.repository }}"
+            ]
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -36,20 +42,22 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Configure Git
-        run: |
-          git config --local user.email "github-app@lansweeper.com"
-          git config --local user.name "Lansweeper Deploy Bot"
-
       - name: Increment Version
         run: |
+          # Increment version
           npm version patch -m "Bump version to %s [skip ci]"
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Push Version Update
         run: |
-          # Push using the GitHub App token that has bypass permissions
-          git push https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/Lansweeper-public/MCP-server-lansweeper.git HEAD:main --follow-tags
+          git config --local user.email "github-app@lansweeper.com"
+          git config --local user.name "Lansweeper Deploy Bot"
+
+          # Set the remote URL with token
+          git remote set-url origin https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/${{ github.repository }}.git
+          
+          # Push directly using the configured remote
+          git push origin HEAD:main --follow-tags
         
       - name: Publish to npm
         run: yarn publish --access public --new-version ${{ env.NEW_VERSION }} --no-git-tag-version
