@@ -48,9 +48,19 @@ jobs:
 
       - name: Push Version Update
         run: |
-          # Push using the GitHub App token that has bypass permissions
-          git push https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/Lansweeper-public/MCP-server-lansweeper.git HEAD:main --follow-tags
-        
+          # Create a new branch for the version update
+          git checkout -b version-update-${{ env.NEW_VERSION }}
+          git push https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/Lansweeper-public/MCP-server-lansweeper.git HEAD:version-update-${{ env.NEW_VERSION }} --follow-tags
+
+          # Create a pull request
+          gh pr create \
+            --title "Version update to ${{ env.NEW_VERSION }}" \
+            --body "This pull request updates the version to ${{ env.NEW_VERSION }}." \
+            --base main \
+            --head version-update-${{ env.NEW_VERSION }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish to npm
         run: yarn publish --access public --new-version ${{ env.NEW_VERSION }} --no-git-tag-version
         env:
