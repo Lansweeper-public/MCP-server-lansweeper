@@ -1,6 +1,6 @@
-# Lansweeper MCP Server
+# Lansweeper MCP Server (Experimental)
 
-An MCP (Model Context Protocol) server for querying the Lansweeper API.
+An experimental MCP (Model Context Protocol) server for querying the Lansweeper API.
 
 ## Prerequisites
 
@@ -74,6 +74,7 @@ Add the following to your `claude_desktop_config.json`:
 ```
 
 This file is located at:
+
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
