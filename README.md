@@ -98,10 +98,7 @@ LANSWEEPER_PERSONAL_ACCESS_TOKEN=your-lansweeper-token npx -y @lansweeper-public
 
 The MCP server provides the following tools:
 
-1. `get-assets`: Retrieve a list of assets from Lansweeper
-2. `get-asset-details`: Get detailed information about a specific asset
-3. `search-assets`: Search for assets by name or other criteria
-4. `get-sites`: Get a list of Lansweeper sites
+1. `get-asset-details`: Get detailed information about a specific asset
 
 ## Development
 
