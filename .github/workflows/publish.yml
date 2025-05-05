@@ -16,6 +16,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Generate GitHub App token
+        id: generate-token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.LANSWEEPER_BOT_APP_ID }}
+          private_key: ${{ secrets.LANSWEEPER_BOT_PRIVATE_KEY }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -31,8 +38,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-app@lansweeper.com"
+          git config --local user.name "Lansweeper Deploy Bot"
 
       - name: Increment Version
         run: |
@@ -41,11 +48,9 @@ jobs:
 
       - name: Push Version Update
         run: |
-          git push origin main
-          git push origin --tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          # Push using the GitHub App token that has bypass permissions
+          git push https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/Lansweeper-public/MCP-server-lansweeper.git HEAD:main --follow-tags
+        
       - name: Publish to npm
         run: yarn publish --access public --new-version ${{ env.NEW_VERSION }} --no-git-tag-version
         env:
