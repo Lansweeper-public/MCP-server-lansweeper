@@ -125,4 +125,4 @@ yarn dev
 
 ## License
 
-ISC
+Server Side Public License v1 (SSPL v1)
