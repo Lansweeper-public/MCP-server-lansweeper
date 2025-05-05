@@ -20,14 +20,10 @@ jobs:
 
       - name: Generate GitHub App token
         id: generate-token
-        uses: tibdex/github-app-token@v2
+        uses: actions/create-github-app-token@v2
         with:
-          app_id: ${{ secrets.LANSWEEPER_BOT_APP_ID }}
-          private_key: ${{ secrets.LANSWEEPER_BOT_PRIVATE_KEY }}
-          repositories: >-
-            [
-              "${{ github.repository }}"
-            ]
+          app-id: ${{ secrets.LANSWEEPER_BOT_APP_ID }}
+          private-key: ${{ secrets.LANSWEEPER_BOT_PRIVATE_KEY }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -55,10 +51,10 @@ jobs:
 
           # Set the remote URL with token
           git remote set-url origin https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/${{ github.repository }}.git
-          
+
           # Push directly using the configured remote
           git push origin HEAD:main --follow-tags
-        
+
       - name: Publish to npm
         run: yarn publish --access public --new-version ${{ env.NEW_VERSION }} --no-git-tag-version
         env:
