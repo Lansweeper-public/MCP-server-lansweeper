@@ -12,6 +12,7 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     environment: NPM
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     steps:
       - name: Generate GitHub App token
         id: generate-token
@@ -39,8 +40,8 @@ jobs:
 
       - name: Increment Version
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name "Lansweeper Deploy Bot"
+          git config user.email "github-app@lansweeper.com"
 
           # Increment version
           npm version patch -m "Bump version to %s [skip ci]"
