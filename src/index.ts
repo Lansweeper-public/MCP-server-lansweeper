@@ -21,6 +21,8 @@ import {
   // getSitesSchema,
   // searchAssetsHandler,
   // searchAssetsSchema,
+  getVulnerabilitiesHandler,
+  getVulnerabilitiesSchema,
 } from "./tools/index.js";
 
 // Create server instance
@@ -41,6 +43,12 @@ server.tool(
   getAssetDetailsHandler,
 );
 // server.tool("get-assets", "Get assets from Lansweeper", getAssetsSchema, getAssetsHandler);
+server.tool(
+  "get-vulnerabilities",
+  "Query vulnerabilities from Lansweeper site",
+  getVulnerabilitiesSchema,
+  getVulnerabilitiesHandler,
+);
 // server.tool(
 //   "search-assets",
 //   "Search for assets by name, IP address, or other criteria",
