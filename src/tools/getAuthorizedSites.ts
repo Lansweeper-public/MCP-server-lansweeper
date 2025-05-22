@@ -50,15 +50,12 @@ interface Site {
   id: string;
   name: string;
   brandingName: string;
-  logoUrl: string;
-  companyName: string;
   customFields: CustomField[];
   relations: AssetRelationType[];
   assetStates: AssetState[];
   assetTypes: string[];
   accounts: SiteAccount[];
   authorizedReports: AuthorizedReport[];
-  isDashboardIntegrationEnabled?: boolean;
 }
 
 interface AuthorizedSitesResponse {
