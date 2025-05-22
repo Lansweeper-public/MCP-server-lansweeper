@@ -48,14 +48,6 @@ server.tool(
   getAuthorizedSitesSchema.shape,
   getAuthorizedSitesHandler,
 );
-// server.tool("get-assets", "Get assets from Lansweeper", getAssetsSchema, getAssetsHandler);
-// server.tool(
-//   "search-assets",
-//   "Search for assets by name, IP address, or other criteria",
-//   searchAssetsSchema,
-//   searchAssetsHandler,
-// );
-// server.tool("get-sites", "Get list of Lansweeper sites", getSitesSchema, getSitesHandler);
 
 // Export a function to start the server
 async function startServer(): Promise<void> {
