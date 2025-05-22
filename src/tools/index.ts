@@ -2,5 +2,4 @@
 export * from "./getAssets.js";
 export * from "./getAssetDetails.js";
 export * from "./searchAssets.js";
-export * from "./getSites.js";
 export * from "./getAuthorizedSites.js";

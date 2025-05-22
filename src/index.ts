@@ -15,6 +15,8 @@ const version = packageJson.version;
 import {
   getAssetDetailsHandler,
   getAssetDetailsSchema,
+  getAuthorizedSitesHandler,
+  getAuthorizedSitesSchema,
   // getAssetsHandler,
   // getAssetsSchema,
   // getSitesHandler,
@@ -39,6 +41,12 @@ server.tool(
   "Get detailed information about a specific asset",
   getAssetDetailsSchema,
   getAssetDetailsHandler,
+);
+server.tool(
+  "get-authorized-sites",
+  "Get information about authorized sites",
+  getAuthorizedSitesSchema.shape,
+  getAuthorizedSitesHandler,
 );
 // server.tool("get-assets", "Get assets from Lansweeper", getAssetsSchema, getAssetsHandler);
 // server.tool(

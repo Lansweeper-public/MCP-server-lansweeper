@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { createGraphQLClient } from "../client/graphqlClient.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
@@ -67,22 +68,40 @@ interface AuthorizedSitesResponse {
 }
 
 // Define the schema for the tool parameters
-// This tool doesn't require any parameters since authorizedSites doesn't take any in the API
-export const getAuthorizedSitesSchema = {};
+export const getAuthorizedSitesSchema = z.object({
+  fields: z
+    .array(
+      z.enum([
+        "brandingName",
+        "customFields",
+        "relations",
+        "assetStates",
+        "assetTypes",
+        "accounts",
+        "authorizedReports",
+      ]),
+    )
+    .optional()
+    .describe(
+      "Optional list of specific fields to include in the query. Options: brandingName, customFields, relations, assetStates, assetTypes, accounts, authorizedReports.",
+    ),
+});
 
 // Implementation of the getAuthorizedSites tool
-export const getAuthorizedSitesHandler = async (): Promise<CallToolResult> => {
-  // Build the GraphQL query for authorizedSites
-  const query = `
-    query GetAuthorizedSites {
-      authorizedSites {
-        sites {
-          id
-          name
-          brandingName
-          logoUrl
-          companyName
-          customFields {
+export const getAuthorizedSitesHandler = async ({
+  fields = [], // Default to empty array if not provided
+}: {
+  fields?: Array<
+    "brandingName" | "customFields" | "relations" | "assetStates" | "assetTypes" | "accounts" | "authorizedReports"
+  >;
+}): Promise<CallToolResult> => {
+  // Build dynamic query based on requested fields
+  const buildFieldQuery = (field: string): string => {
+    switch (field) {
+      case "brandingName":
+        return `brandingName`;
+      case "customFields":
+        return `customFields {
             name
             type
             key
@@ -93,34 +112,56 @@ export const getAuthorizedSitesHandler = async (): Promise<CallToolResult> => {
               minNumericValue
               maxNumericValue
             }
-          }
-          relations {
+        }`;
+      case "relations":
+        return `relations {
             installationId
             name
             reverseName
             default
-          }
-          assetStates {
+        }`;
+      case "assetStates":
+        return `assetStates {
             name
             assetStateKey
-          }
-          assetTypes
-          accounts {
+        }`;
+      case "assetTypes":
+        return `assetTypes`;
+      case "accounts":
+        return `accounts {
             username
             email
             status
             lastTimeAccess
             createdAt
             joinedAt
-          }
-          authorizedReports {
+        }`;
+      case "authorizedReports":
+        return `authorizedReports {
             id
             name
             isDefault
             description
             category
             subcategory
-          }
+        }`;
+      default:
+        // If the field is not recognized, return an empty string
+        return "";
+    }
+  };
+
+  // Build the fields part of the query
+  const fieldsQuery = fields?.map(buildFieldQuery).join("\n");
+
+  // Build the GraphQL query for authorizedSites
+  const query = `
+    query GetAuthorizedSites {
+      authorizedSites {
+        sites {
+          id
+          name
+          ${fieldsQuery}
         }
       }
     }
