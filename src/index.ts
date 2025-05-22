@@ -17,12 +17,6 @@ import {
   getAssetDetailsSchema,
   getAuthorizedSitesHandler,
   getAuthorizedSitesSchema,
-  // getAssetsHandler,
-  // getAssetsSchema,
-  // getSitesHandler,
-  // getSitesSchema,
-  // searchAssetsHandler,
-  // searchAssetsSchema,
 } from "./tools/index.js";
 
 // Create server instance
