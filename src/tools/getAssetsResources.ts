@@ -11,7 +11,7 @@ interface AssetResourcePagination {
 }
 
 interface AssetResourcesResponse {
-  items: any[]; // The actual asset data structure varies based on requested fields
+  items: Record<string, unknown>[]; // The actual asset data structure varies based on requested fields
   pagination: AssetResourcePagination;
   total: number;
 }
@@ -124,11 +124,68 @@ const AssetsFilterGroupedInputSchema: z.ZodType<AssetsFilterGroupedInputType> = 
   }),
 );
 
+// Available asset field paths for querying
+const availableAssetFields = [
+  "key",
+  "installKey",
+  "installationId",
+  "assetBasicInfo.cloudCategory",
+  "assetBasicInfo.cloudEnvId",
+  "assetBasicInfo.cloudEnvName",
+  "assetBasicInfo.cloudOrgId",
+  "assetBasicInfo.cloudOrgName",
+  "assetBasicInfo.cloudProvider",
+  "assetBasicInfo.cloudRegion",
+  "assetBasicInfo.cloudTags",
+  "assetBasicInfo.description",
+  "assetBasicInfo.domain",
+  "assetBasicInfo.firstSeen",
+  "assetBasicInfo.fqdn",
+  "assetBasicInfo.ipAddress",
+  "assetBasicInfo.lastSeen",
+  "assetBasicInfo.lastTried",
+  "assetBasicInfo.lastUpdated",
+  "assetBasicInfo.mac",
+  "assetBasicInfo.name",
+  "assetBasicInfo.origin",
+  "assetBasicInfo.scannerTypes",
+  "assetBasicInfo.subType",
+  "assetBasicInfo.type",
+  "assetBasicInfo.typeGroup",
+  "assetBasicInfo.userName",
+  "assetCustom.comment",
+  "assetCustom.department",
+  "assetCustom.dnsName",
+  "assetCustom.fields.fieldKey",
+  "assetCustom.fields.name",
+  "assetCustom.fields.value",
+  "assetCustom.location",
+  "assetCustom.manufacturer",
+  "assetCustom.model",
+  "assetCustom.purchaseDate",
+  "assetCustom.serialNumber",
+  "assetCustom.stateName",
+  "assetCustom.warrantyDate",
+  "assetGroups.assetGroupKey",
+  "assetGroups.name",
+  "operatingSystem.buildNumber",
+  "operatingSystem.caption",
+  "operatingSystem.version",
+  "otData.moduleType",
+  "reconciliations.sourceId",
+  "relations.childAssetKey",
+  "relations.name",
+  "relations.parentAssetKey",
+] as const;
+
+const AvailableAssetFieldsSchema = z.enum(availableAssetFields);
+
 // Export types for TypeScript usage
 export type AssetsFilterType = z.infer<typeof AssetsFilterTypeEnum>;
 export type AssetsFilterConjunction = z.infer<typeof AssetsFilterConjunctionEnum>;
 export type AssetsFiltersCondition = z.infer<typeof AssetsFiltersConditionSchema>;
 export type AssetsFilterGroupedInput = AssetsFilterGroupedInputType;
+export type AvailableAssetFields = z.infer<typeof AvailableAssetFieldsSchema>;
 
 // Define the schema for the tool parameters
 export const getAssetsResourcesSchema = {
@@ -143,12 +200,11 @@ export const getAssetsResourcesSchema = {
     "Structured filter object with conditions, conjunctions, and nested groups",
   ),
   fields: z
-    .array(z.string())
+    .array(AvailableAssetFieldsSchema)
+    .max(50)
     .optional()
     .describe(
-      "Optional list of specific fields or field groups to request. If not provided, all default groups will be used. " +
-        "Available field groups: 'assetBasicInfo', 'network', 'time', 'hardware', 'location', 'operating_system', 'custom_fields', 'state', 'relationships'. " +
-        "Available fields are: key, assetBasicInfo.name, assetBasicInfo.domain, assetBasicInfo.type, assetBasicInfo.subType, assetBasicInfo.typeGroup, assetBasicInfo.cloudCategory, assetBasicInfo.cloudEnvId, assetBasicInfo.cloudEnvName, assetBasicInfo.cloudOrgId, assetBasicInfo.cloudOrgName, assetBasicInfo.cloudProvider, assetBasicInfo.cloudRegion, assetBasicInfo.cloudTags, assetBasicInfo.description, assetBasicInfo.firstSeen, assetBasicInfo.ipAddress, assetBasicInfo.lastSeen, assetBasicInfo.lastTried, assetBasicInfo.lastUpdated, assetBasicInfo.mac, assetBasicInfo.origin, assetBasicInfo.scannerTypes, assetBasicInfo.userName, assetBasicInfo.fqdn, assetCustom.dnsName, assetCustom.manufacturer, assetCustom.model, assetCustom.purchaseDate, assetCustom.serialNumber, assetCustom.stateName, assetCustom.warrantyDate, assetCustom.location, assetCustom.department, assetCustom.comment, assetCustom.fields.fieldKey, assetCustom.fields.name, assetCustom.fields.value, assetGroups.assetGroupKey, assetGroups.name, operatingSystem.caption, operatingSystem.version, operatingSystem.buildNumber, reconciliations.sourceId, relations.childAssetKey, relations.parentAssetKey, relations.name, installKey, installationId, otData.moduleType",
+      `Optional list of specific field paths to request. If not provided, default fields will be used. Maximum 50 fields allowed. Available fields: ${availableAssetFields.join(", ")}`,
     ),
   cursor: z.string().optional().describe("Cursor for pagination"),
 };
@@ -165,62 +221,38 @@ export const getAssetsResourcesHandler = async ({
     siteId: string;
     limit?: number;
     filters?: AssetsFilterGroupedInput;
-    fields?: string[];
+    fields?: AvailableAssetFields[];
     cursor?: string;
   }>
 >): Promise<CallToolResult> => {
   // Define default fields to query if none specified
-  const defaultFields = ["assetBasicInfo"];
+  const defaultFields: AvailableAssetFields[] = [
+    "key",
+    "assetBasicInfo.name",
+    "assetBasicInfo.domain",
+    "assetBasicInfo.type",
+    "assetBasicInfo.subType",
+    "assetBasicInfo.typeGroup",
+    "installationId",
+  ];
 
-  // Build dynamic query based on requested fields
-  const buildFieldQuery = (field: string): string[] => {
-    switch (field) {
-      case "assetBasicInfo":
-        return [
-          "key",
-          "assetBasicInfo.name",
-          "assetBasicInfo.domain",
-          "assetBasicInfo.type",
-          "assetBasicInfo.subType",
-          "assetBasicInfo.typeGroup",
-          "installationId",
-        ];
-      case "network":
-        return ["assetBasicInfo.ipAddress", "assetBasicInfo.mac", "assetBasicInfo.fqdn"];
-      case "time":
-        return ["assetBasicInfo.firstSeen", "assetBasicInfo.lastSeen", "assetBasicInfo.lastUpdated"];
-      case "hardware":
-        return ["assetCustom.manufacturer", "assetCustom.model", "assetCustom.serialNumber"];
-      case "location":
-        return ["assetCustom.location", "assetCustom.department", "assetCustom.comment"];
-      case "operating_system":
-        return ["operatingSystem.caption", "operatingSystem.version", "operatingSystem.buildNumber"];
-      case "custom_fields":
-        return ["assetCustom.fields.fieldKey", "assetCustom.fields.name", "assetCustom.fields.value"];
-      case "state":
-        return ["assetCustom.stateName"];
-      case "relationships":
-        return ["reconciliations.sourceId", "relations.childAssetKey", "relations.parentAssetKey", "relations.name"];
-      default:
-        // If it's a raw field name, return it directly
-        return [field];
-    }
-  };
-
-  // Use user-specified fields or defaults, and expand them using buildFieldQuery
-  const fieldsToQuery = fields.length > 0 ? fields.flatMap(buildFieldQuery) : defaultFields.flatMap(buildFieldQuery);
+  // Use user-specified fields or defaults
+  const fieldsToQuery = fields.length > 0 ? fields : defaultFields;
 
   // Prepare pagination object
-  const pagination: any = { limit };
-  if (cursor) {
-    pagination.cursor = cursor;
-    pagination.page = "NEXT";
-  } else {
-    pagination.page = "FIRST";
-  }
+  const pagination = {
+    limit,
+    page: cursor ? "NEXT" : "FIRST",
+    ...(cursor && { cursor }),
+  };
 
   // Prepare variables for GraphQL query
-  const variables: any = {
+  const variables: {
+    siteId: string;
+    fields: AvailableAssetFields[];
+    assetPagination: Record<string, unknown>;
+    filters?: AssetsFilterGroupedInput;
+  } = {
     siteId,
     fields: fieldsToQuery,
     assetPagination: pagination,
