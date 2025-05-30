@@ -15,8 +15,8 @@ const version = packageJson.version;
 import {
   getAssetDetailsHandler,
   getAssetDetailsSchema,
-  getAssetsResourcesHandler,
-  getAssetsResourcesSchema,
+  getAuthorizedSitesHandler,
+  getAuthorizedSitesSchema,
   // getAssetsHandler,
   // getAssetsSchema,
   // getSitesHandler,
@@ -48,14 +48,13 @@ server.tool(
   getAssetsResourcesSchema,
   getAssetsResourcesHandler,
 );
-// server.tool("get-assets", "Get assets from Lansweeper", getAssetsSchema, getAssetsHandler);
-// server.tool(
-//   "search-assets",
-//   "Search for assets by name, IP address, or other criteria",
-//   searchAssetsSchema,
-//   searchAssetsHandler,
-// );
-// server.tool("get-sites", "Get list of Lansweeper sites", getSitesSchema, getSitesHandler);
+
+server.tool(
+  "get-authorized-sites",
+  "Get information about authorized sites",
+  getAuthorizedSitesSchema.shape,
+  getAuthorizedSitesHandler,
+);
 
 // Export a function to start the server
 async function startServer(): Promise<void> {
