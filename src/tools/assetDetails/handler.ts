@@ -1,29 +1,13 @@
-import { z } from "zod";
-import { createGraphQLClient } from "../client/graphqlClient.js";
+import { createGraphQLClient } from "../../client/graphqlClient.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-
-// Define the schema for the tool parameters
-export const getAssetDetailsSchema = {
-  siteId: z.string().describe("ID of the site containing the asset"),
-  assetKey: z.string().describe("Key of the asset to retrieve details for"),
-  fields: z
-    .array(z.string())
-    .optional()
-    .describe("Optional list of specific fields to request. If not provided, a default set of fields will be used."),
-};
+import { GetAssetDetailsInput } from "./schema.js";
 
 // Implementation of the get-asset-details tool
 export const getAssetDetailsHandler = async ({
   siteId,
   assetKey,
   fields = [], // Default to empty array if not provided
-}: z.infer<
-  z.ZodSchema<{
-    siteId: string;
-    assetKey: string;
-    fields?: string[];
-  }>
->): Promise<CallToolResult> => {
+}: GetAssetDetailsInput): Promise<CallToolResult> => {
   // Define default fields to query if none specified
   const defaultFields = [
     "assetBasicInfo",

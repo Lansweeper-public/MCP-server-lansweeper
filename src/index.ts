@@ -15,14 +15,10 @@ const version = packageJson.version;
 import {
   getAssetDetailsHandler,
   getAssetDetailsSchema,
+  getAssetsResourcesHandler,
+  getAssetsResourcesSchema,
   getAuthorizedSitesHandler,
   getAuthorizedSitesSchema,
-  // getAssetsHandler,
-  // getAssetsSchema,
-  // getSitesHandler,
-  // getSitesSchema,
-  // searchAssetsHandler,
-  // searchAssetsSchema,
 } from "./tools/index.js";
 
 // Create server instance
@@ -42,6 +38,13 @@ server.tool(
   getAssetDetailsSchema,
   getAssetDetailsHandler,
 );
+server.tool(
+  "get-assets-resources",
+  "Get asset resources from a Lansweeper site",
+  getAssetsResourcesSchema,
+  getAssetsResourcesHandler,
+);
+
 server.tool(
   "get-authorized-sites",
   "Get information about authorized sites",
