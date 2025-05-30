@@ -47,10 +47,50 @@ const AssetsFilterTypeEnum = z.enum([
 // AssetsFilterConjunction enum - logical operators
 const AssetsFilterConjunctionEnum = z.enum(["AND", "OR"]);
 
+const reservedFilterPaths = [
+  "assetBasicInfo.cloudCategory",
+  "assetBasicInfo.cloudEnvId",
+  "assetBasicInfo.cloudEnvName",
+  "assetBasicInfo.cloudOrgId",
+  "assetBasicInfo.cloudOrgName",
+  "assetBasicInfo.cloudProvider",
+  "assetBasicInfo.cloudRegion",
+  "assetBasicInfo.cloudTags",
+  "assetBasicInfo.description",
+  "assetBasicInfo.domain",
+  "assetBasicInfo.firstSeen",
+  "assetBasicInfo.ipAddress",
+  "assetBasicInfo.lastSeen",
+  "assetBasicInfo.lastTried",
+  "assetBasicInfo.lastUpdated",
+  "assetBasicInfo.mac",
+  "assetBasicInfo.name",
+  "assetBasicInfo.origin",
+  "assetBasicInfo.scannerTypes",
+  "assetBasicInfo.subType",
+  "assetBasicInfo.type",
+  "assetBasicInfo.typeGroup",
+  "assetBasicInfo.userName",
+  "assetCustom.dnsName",
+  "assetCustom.manufacturer",
+  "assetCustom.model",
+  "assetCustom.purchaseDate",
+  "assetCustom.serialNumber",
+  "assetCustom.stateName",
+  "assetCustom.warrantyDate",
+  "assetGroups.assetGroupKey",
+  "assetGroups.name",
+  "installKey",
+  "installationId",
+  "key",
+  "otData.moduleType",
+] as const;
+const FilterPathsSchema = z.enum(reservedFilterPaths);
+
 // AssetsFiltersCondition - individual filter condition
 const AssetsFiltersConditionSchema = z.object({
   operator: AssetsFilterTypeEnum.describe("The filter operator to apply"),
-  path: z.string().describe(
+  path: FilterPathsSchema.describe(
     `The field path to filter on. Available paths: 
         assetBasicInfo.cloudCategory, assetBasicInfo.cloudEnvId, assetBasicInfo.cloudEnvName, 
         assetBasicInfo.cloudOrgId, assetBasicInfo.cloudOrgName, assetBasicInfo.cloudProvider, 
@@ -92,7 +132,12 @@ export type AssetsFilterGroupedInput = AssetsFilterGroupedInputType;
 
 // Define the schema for the tool parameters
 export const getAssetsResourcesSchema = {
-  siteId: z.string().describe("ID of the site containing the assets"),
+  siteId: z
+    .string()
+    .uuid()
+    .describe(
+      "UUID of the site containing the assets. Use the 'get-authorized-sites' tool to discover available site identifiers and their corresponding UUIDs.",
+    ),
   limit: z.number().max(500).optional().describe("Maximum number of assets to return (default: 10)"),
   filters: AssetsFilterGroupedInputSchema.optional().describe(
     "Structured filter object with conditions, conjunctions, and nested groups",
@@ -186,7 +231,14 @@ export const getAssetsResourcesHandler = async ({
     try {
       variables.filters = filters;
     } catch (error) {
-      throw new Error(`Invalid filters JSON: ${error instanceof Error ? error.message : String(error)}`);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Invalid filters JSON: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+      };
     }
   }
 

@@ -4,7 +4,12 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 // Define the schema for the tool parameters
 export const getAssetDetailsSchema = {
-  siteId: z.string().describe("ID of the site containing the asset"),
+  siteId: z
+    .string()
+    .uuid()
+    .describe(
+      "UUID of the site containing the asset. Use the 'get-authorized-sites' tool to discover available site identifiers and their corresponding UUIDs.",
+    ),
   assetKey: z.string().describe("Key of the asset to retrieve details for"),
   fields: z
     .array(z.string())
