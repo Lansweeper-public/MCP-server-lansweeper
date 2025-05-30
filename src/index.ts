@@ -15,6 +15,8 @@ const version = packageJson.version;
 import {
   getAssetDetailsHandler,
   getAssetDetailsSchema,
+  getAssetsResourcesHandler,
+  getAssetsResourcesSchema,
   getAuthorizedSitesHandler,
   getAuthorizedSitesSchema,
   // getAssetsHandler,
