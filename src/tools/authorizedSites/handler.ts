@@ -1,97 +1,11 @@
-import { z } from "zod";
-import { createGraphQLClient } from "../client/graphqlClient.js";
+import { createGraphQLClient } from "../../client/graphqlClient.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-
-// Define interfaces for the GraphQL response
-interface CustomField {
-  name: string;
-  type: string;
-  key: string;
-  props: {
-    currencyType?: string;
-    options?: string[];
-    linkTag?: string;
-    minNumericValue?: number;
-    maxNumericValue?: number;
-  };
-}
-
-interface AssetRelationType {
-  installationId: string;
-  name: string;
-  reverseName: string;
-  default: boolean;
-}
-
-interface AssetState {
-  name: string;
-  assetStateKey: string;
-}
-
-interface SiteAccount {
-  username: string;
-  email: string;
-  status: string;
-  lastTimeAccess: string;
-  createdAt: string;
-  joinedAt: string;
-}
-
-interface AuthorizedReport {
-  id: string;
-  name: string;
-  isDefault: boolean;
-  description: string;
-  category: string;
-  subcategory: string;
-}
-
-interface Site {
-  id: string;
-  name: string;
-  brandingName: string;
-  customFields: CustomField[];
-  relations: AssetRelationType[];
-  assetStates: AssetState[];
-  assetTypes: string[];
-  accounts: SiteAccount[];
-  authorizedReports: AuthorizedReport[];
-}
-
-interface AuthorizedSitesResponse {
-  authorizedSites: {
-    sites: Site[];
-  };
-}
-
-// Define the schema for the tool parameters
-export const getAuthorizedSitesSchema = z.object({
-  fields: z
-    .array(
-      z.enum([
-        "brandingName",
-        "customFields",
-        "relations",
-        "assetStates",
-        "assetTypes",
-        "accounts",
-        "authorizedReports",
-      ]),
-    )
-    .optional()
-    .describe(
-      "Optional list of specific fields to include in the query. Options: brandingName, customFields, relations, assetStates, assetTypes, accounts, authorizedReports.",
-    ),
-});
+import { GetAuthorizedSitesInput, AuthorizedSitesResponse } from "./schema.js";
 
 // Implementation of the getAuthorizedSites tool
 export const getAuthorizedSitesHandler = async ({
   fields = [], // Default to empty array if not provided
-}: {
-  fields?: Array<
-    "brandingName" | "customFields" | "relations" | "assetStates" | "assetTypes" | "accounts" | "authorizedReports"
-  >;
-}): Promise<CallToolResult> => {
+}: GetAuthorizedSitesInput): Promise<CallToolResult> => {
   // Build dynamic query based on requested fields
   const buildFieldQuery = (field: string): string => {
     switch (field) {
