@@ -81,7 +81,7 @@ export type AssetsFilterGroupedInput = AssetsFilterGroupedInputType;
 // Define the schema for the tool parameters
 export const getAssetsResourcesSchema = {
   siteId: z.string().describe("ID of the site containing the assets"),
-  limit: z.number().optional().describe("Maximum number of assets to return (default: 10)"),
+  limit: z.number().max(500).optional().describe("Maximum number of assets to return (default: 10)"),
   filters: AssetsFilterGroupedInputSchema.optional().describe(
     "Structured filter object with conditions, conjunctions, and nested groups",
   ),
@@ -181,10 +181,10 @@ export const getAssetsResourcesHandler = async ({
   // Build GraphQL query with variables
   const query = `
     query GetAssetsResources(
-      $siteId: String!
+      $siteId: ID!
       $fields: [String!]!
-      $assetPagination: AssetPaginationInput
-      $filters: FilterInput
+      $assetPagination: AssetsPaginationInputValidated
+      $filters: AssetsFilterGroupedInput
     ) {
       site(id: $siteId) {
         assetResources(
