@@ -50,7 +50,19 @@ const AssetsFilterConjunctionEnum = z.enum(["AND", "OR"]);
 // AssetsFiltersCondition - individual filter condition
 const AssetsFiltersConditionSchema = z.object({
   operator: AssetsFilterTypeEnum.describe("The filter operator to apply"),
-  path: z.string().describe("The field path to filter on (e.g., 'assetBasicInfo.name', 'assetBasicInfo.type')"),
+  path: z.string().describe(
+    `The field path to filter on. Available paths: 
+        assetBasicInfo.cloudCategory, assetBasicInfo.cloudEnvId, assetBasicInfo.cloudEnvName, 
+        assetBasicInfo.cloudOrgId, assetBasicInfo.cloudOrgName, assetBasicInfo.cloudProvider, 
+        assetBasicInfo.cloudRegion, assetBasicInfo.cloudTags, assetBasicInfo.description, 
+        assetBasicInfo.domain, assetBasicInfo.firstSeen, assetBasicInfo.ipAddress, 
+        assetBasicInfo.lastSeen, assetBasicInfo.lastTried, assetBasicInfo.lastUpdated, 
+        assetBasicInfo.mac, assetBasicInfo.name, assetBasicInfo.origin, assetBasicInfo.scannerTypes, 
+        assetBasicInfo.subType, assetBasicInfo.type, assetBasicInfo.typeGroup, assetBasicInfo.userName, 
+        assetCustom.dnsName, assetCustom.manufacturer, assetCustom.model, assetCustom.purchaseDate, 
+        assetCustom.serialNumber, assetCustom.stateName, assetCustom.warrantyDate, 
+        assetGroups.assetGroupKey, assetGroups.name, installKey, installationId, key, otData.moduleType`,
+  ),
   value: z.string().describe("The value to filter by"),
 });
 
@@ -90,7 +102,7 @@ export const getAssetsResourcesSchema = {
     .optional()
     .describe(
       "Optional list of specific fields or field groups to request. If not provided, all default groups will be used. " +
-        "Available field groups: 'basic', 'network', 'time', 'hardware', 'location', 'operating_system', 'custom_fields', 'state', 'relationships'. " +
+        "Available field groups: 'assetBasicInfo', 'network', 'time', 'hardware', 'location', 'operating_system', 'custom_fields', 'state', 'relationships'. " +
         "You can also provide specific individual fields like 'key' or 'assetBasicInfo.name'.",
     ),
   cursor: z.string().optional().describe("Cursor for pagination"),
@@ -113,12 +125,12 @@ export const getAssetsResourcesHandler = async ({
   }>
 >): Promise<CallToolResult> => {
   // Define default fields to query if none specified
-  const defaultFields = ["basic"];
+  const defaultFields = ["assetBasicInfo"];
 
   // Build dynamic query based on requested fields
   const buildFieldQuery = (field: string): string[] => {
     switch (field) {
-      case "basic":
+      case "assetBasicInfo":
         return [
           "key",
           "assetBasicInfo.name",
@@ -219,6 +231,7 @@ export const getAssetsResourcesHandler = async ({
       nextCursor: response.site.assetResources.pagination.next || undefined,
     };
   } catch (error) {
+    console.log(error);
     return {
       content: [
         {
