@@ -51,6 +51,98 @@ const reservedFilterPaths = [
   "key",
   "installKey",
   "installationId",
+  "assetBasicInfo.cloudCategory",
+  "assetBasicInfo.cloudEnvId",
+  "assetBasicInfo.cloudEnvName",
+  "assetBasicInfo.cloudOrgId",
+  "assetBasicInfo.cloudOrgName",
+  "assetBasicInfo.cloudProvider",
+  "assetBasicInfo.cloudRegion",
+  "assetBasicInfo.cloudTags",
+  "assetBasicInfo.description",
+  "assetBasicInfo.domain",
+  "assetBasicInfo.firstSeen",
+  "assetBasicInfo.fqdn",
+  "assetBasicInfo.ipAddress",
+  "assetBasicInfo.lastSeen",
+  "assetBasicInfo.lastTried",
+  "assetBasicInfo.lastUpdated",
+  "assetBasicInfo.mac",
+  "assetBasicInfo.name",
+  "assetBasicInfo.origin",
+  "assetBasicInfo.scannerTypes",
+  "assetBasicInfo.subType",
+  "assetBasicInfo.type",
+  "assetBasicInfo.typeGroup",
+  "assetBasicInfo.userName",
+  "assetCustom.comment",
+  "assetCustom.department",
+  "assetCustom.dnsName",
+  "assetCustom.fields.fieldKey",
+  "assetCustom.fields.name",
+  "assetCustom.fields.value",
+  "assetCustom.location",
+  "assetCustom.manufacturer",
+  "assetCustom.model",
+  "assetCustom.purchaseDate",
+  "assetCustom.serialNumber",
+  "assetCustom.stateName",
+  "assetCustom.warrantyDate",
+  "assetGroups.assetGroupKey",
+  "assetGroups.name",
+  "operatingSystem.buildNumber",
+  "operatingSystem.caption",
+  "operatingSystem.version",
+  "otData.moduleType",
+  "reconciliations.sourceId",
+  "relations.childAssetKey",
+  "relations.name",
+  "relations.parentAssetKey",
+] as const;
+const FilterPathsSchema = z.enum(reservedFilterPaths);
+
+// AssetsFiltersCondition - individual filter condition
+const AssetsFiltersConditionSchema = z.object({
+  operator: AssetsFilterTypeEnum.describe("The filter operator to apply"),
+  path: FilterPathsSchema.describe(
+    `The field path to filter on. Available paths: 
+        assetBasicInfo.cloudCategory, assetBasicInfo.cloudEnvId, assetBasicInfo.cloudEnvName, 
+        assetBasicInfo.cloudOrgId, assetBasicInfo.cloudOrgName, assetBasicInfo.cloudProvider, 
+        assetBasicInfo.cloudRegion, assetBasicInfo.cloudTags, assetBasicInfo.description, 
+        assetBasicInfo.domain, assetBasicInfo.firstSeen, assetBasicInfo.ipAddress, 
+        assetBasicInfo.lastSeen, assetBasicInfo.lastTried, assetBasicInfo.lastUpdated, 
+        assetBasicInfo.mac, assetBasicInfo.name, assetBasicInfo.origin, assetBasicInfo.scannerTypes, 
+        assetBasicInfo.subType, assetBasicInfo.type, assetBasicInfo.typeGroup, assetBasicInfo.userName, 
+        assetCustom.dnsName, assetCustom.manufacturer, assetCustom.model, assetCustom.purchaseDate, 
+        assetCustom.serialNumber, assetCustom.stateName, assetCustom.warrantyDate, 
+        assetGroups.assetGroupKey, assetGroups.name, installKey, installationId, key, otData.moduleType`,
+  ),
+  value: z.string().describe("The value to filter by"),
+});
+
+// Type definition for recursive filter structure
+type AssetsFilterGroupedInputType = {
+  conditions?: Array<z.infer<typeof AssetsFiltersConditionSchema>>;
+  conjunction?: z.infer<typeof AssetsFilterConjunctionEnum>;
+  groups?: Array<AssetsFilterGroupedInputType>;
+};
+
+// AssetsFilterGroupedInput - recursive filter structure
+const AssetsFilterGroupedInputSchema: z.ZodType<AssetsFilterGroupedInputType> = z.lazy(() =>
+  z.object({
+    conditions: z.array(AssetsFiltersConditionSchema).optional().describe("Array of filter conditions to apply"),
+    conjunction: AssetsFilterConjunctionEnum.optional().describe(
+      "Logical operator to combine conditions and groups (default: AND)",
+    ),
+    groups: z.array(AssetsFilterGroupedInputSchema).optional().describe("Nested filter groups for complex filtering"),
+  }),
+);
+
+// Available asset field paths for querying
+const availableAssetFields = [
+  "key",
+  "installKey",
+  "installationId",
   "tenantId",
   "url",
   "processes.caption",
@@ -1724,98 +1816,6 @@ const reservedFilterPaths = [
   "reconciliations.fields.key",
   "reconciliations.fields.value",
 ] as const;
-const FilterPathsSchema = z.enum(reservedFilterPaths);
-
-// AssetsFiltersCondition - individual filter condition
-const AssetsFiltersConditionSchema = z.object({
-  operator: AssetsFilterTypeEnum.describe("The filter operator to apply"),
-  path: FilterPathsSchema.describe(
-    `The field path to filter on. Available paths: 
-        assetBasicInfo.cloudCategory, assetBasicInfo.cloudEnvId, assetBasicInfo.cloudEnvName, 
-        assetBasicInfo.cloudOrgId, assetBasicInfo.cloudOrgName, assetBasicInfo.cloudProvider, 
-        assetBasicInfo.cloudRegion, assetBasicInfo.cloudTags, assetBasicInfo.description, 
-        assetBasicInfo.domain, assetBasicInfo.firstSeen, assetBasicInfo.ipAddress, 
-        assetBasicInfo.lastSeen, assetBasicInfo.lastTried, assetBasicInfo.lastUpdated, 
-        assetBasicInfo.mac, assetBasicInfo.name, assetBasicInfo.origin, assetBasicInfo.scannerTypes, 
-        assetBasicInfo.subType, assetBasicInfo.type, assetBasicInfo.typeGroup, assetBasicInfo.userName, 
-        assetCustom.dnsName, assetCustom.manufacturer, assetCustom.model, assetCustom.purchaseDate, 
-        assetCustom.serialNumber, assetCustom.stateName, assetCustom.warrantyDate, 
-        assetGroups.assetGroupKey, assetGroups.name, installKey, installationId, key, otData.moduleType`,
-  ),
-  value: z.string().describe("The value to filter by"),
-});
-
-// Type definition for recursive filter structure
-type AssetsFilterGroupedInputType = {
-  conditions?: Array<z.infer<typeof AssetsFiltersConditionSchema>>;
-  conjunction?: z.infer<typeof AssetsFilterConjunctionEnum>;
-  groups?: Array<AssetsFilterGroupedInputType>;
-};
-
-// AssetsFilterGroupedInput - recursive filter structure
-const AssetsFilterGroupedInputSchema: z.ZodType<AssetsFilterGroupedInputType> = z.lazy(() =>
-  z.object({
-    conditions: z.array(AssetsFiltersConditionSchema).optional().describe("Array of filter conditions to apply"),
-    conjunction: AssetsFilterConjunctionEnum.optional().describe(
-      "Logical operator to combine conditions and groups (default: AND)",
-    ),
-    groups: z.array(AssetsFilterGroupedInputSchema).optional().describe("Nested filter groups for complex filtering"),
-  }),
-);
-
-// Available asset field paths for querying
-const availableAssetFields = [
-  "key",
-  "installKey",
-  "installationId",
-  "assetBasicInfo.cloudCategory",
-  "assetBasicInfo.cloudEnvId",
-  "assetBasicInfo.cloudEnvName",
-  "assetBasicInfo.cloudOrgId",
-  "assetBasicInfo.cloudOrgName",
-  "assetBasicInfo.cloudProvider",
-  "assetBasicInfo.cloudRegion",
-  "assetBasicInfo.cloudTags",
-  "assetBasicInfo.description",
-  "assetBasicInfo.domain",
-  "assetBasicInfo.firstSeen",
-  "assetBasicInfo.fqdn",
-  "assetBasicInfo.ipAddress",
-  "assetBasicInfo.lastSeen",
-  "assetBasicInfo.lastTried",
-  "assetBasicInfo.lastUpdated",
-  "assetBasicInfo.mac",
-  "assetBasicInfo.name",
-  "assetBasicInfo.origin",
-  "assetBasicInfo.scannerTypes",
-  "assetBasicInfo.subType",
-  "assetBasicInfo.type",
-  "assetBasicInfo.typeGroup",
-  "assetBasicInfo.userName",
-  "assetCustom.comment",
-  "assetCustom.department",
-  "assetCustom.dnsName",
-  "assetCustom.fields.fieldKey",
-  "assetCustom.fields.name",
-  "assetCustom.fields.value",
-  "assetCustom.location",
-  "assetCustom.manufacturer",
-  "assetCustom.model",
-  "assetCustom.purchaseDate",
-  "assetCustom.serialNumber",
-  "assetCustom.stateName",
-  "assetCustom.warrantyDate",
-  "assetGroups.assetGroupKey",
-  "assetGroups.name",
-  "operatingSystem.buildNumber",
-  "operatingSystem.caption",
-  "operatingSystem.version",
-  "otData.moduleType",
-  "reconciliations.sourceId",
-  "relations.childAssetKey",
-  "relations.name",
-  "relations.parentAssetKey",
-] as const;
 
 const AvailableAssetFieldsSchema = z.enum(availableAssetFields);
 
@@ -1840,7 +1840,7 @@ export const getAssetsResourcesSchema = {
   ),
   fields: z
     .array(AvailableAssetFieldsSchema)
-    .max(30)
+    .max(0)
     .optional()
     .describe(
       `Optional list of specific field paths to request. If not provided, default fields will be used. Maximum 30 fields allowed. Available fields: ${availableAssetFields.join(", ")}`,
