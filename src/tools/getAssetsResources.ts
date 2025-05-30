@@ -103,7 +103,7 @@ export const getAssetsResourcesSchema = {
     .describe(
       "Optional list of specific fields or field groups to request. If not provided, all default groups will be used. " +
         "Available field groups: 'assetBasicInfo', 'network', 'time', 'hardware', 'location', 'operating_system', 'custom_fields', 'state', 'relationships'. " +
-        "You can also provide specific individual fields like 'key' or 'assetBasicInfo.name'.",
+        "Available fields are: key, assetBasicInfo.name, assetBasicInfo.domain, assetBasicInfo.type, assetBasicInfo.subType, assetBasicInfo.typeGroup, assetBasicInfo.cloudCategory, assetBasicInfo.cloudEnvId, assetBasicInfo.cloudEnvName, assetBasicInfo.cloudOrgId, assetBasicInfo.cloudOrgName, assetBasicInfo.cloudProvider, assetBasicInfo.cloudRegion, assetBasicInfo.cloudTags, assetBasicInfo.description, assetBasicInfo.firstSeen, assetBasicInfo.ipAddress, assetBasicInfo.lastSeen, assetBasicInfo.lastTried, assetBasicInfo.lastUpdated, assetBasicInfo.mac, assetBasicInfo.origin, assetBasicInfo.scannerTypes, assetBasicInfo.userName, assetBasicInfo.fqdn, assetCustom.dnsName, assetCustom.manufacturer, assetCustom.model, assetCustom.purchaseDate, assetCustom.serialNumber, assetCustom.stateName, assetCustom.warrantyDate, assetCustom.location, assetCustom.department, assetCustom.comment, assetCustom.fields.fieldKey, assetCustom.fields.name, assetCustom.fields.value, assetGroups.assetGroupKey, assetGroups.name, operatingSystem.caption, operatingSystem.version, operatingSystem.buildNumber, reconciliations.sourceId, relations.childAssetKey, relations.parentAssetKey, relations.name, installKey, installationId, otData.moduleType",
     ),
   cursor: z.string().optional().describe("Cursor for pagination"),
 };
