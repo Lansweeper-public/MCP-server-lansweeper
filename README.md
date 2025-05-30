@@ -100,6 +100,7 @@ The MCP server provides the following tools:
 
 1. `get-asset-details`: Get detailed information about a specific asset
 2. `get-authorized-sites`: Get information about authorized sites
+3. `get-assets-resources`: Get information about all assets in a site
 
 ## Development
 
