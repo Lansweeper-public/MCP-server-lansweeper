@@ -16,8 +16,11 @@ export const getAssetsResourcesHandler = async ({
     "assetBasicInfo.name",
     "assetBasicInfo.domain",
     "assetBasicInfo.type",
-    "assetBasicInfo.subType",
-    "assetBasicInfo.typeGroup",
+    "assetBasicInfo.description",
+    "assetBasicInfo.fqdn",
+    "assetBasicInfo.ipAddress",
+    "assetCustom.stateName",
+    "assetCustom.serialNumber",
     "installationId",
   ];
 
