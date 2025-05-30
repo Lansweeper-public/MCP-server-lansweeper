@@ -2,6 +2,26 @@ import { z } from "zod";
 import { createGraphQLClient } from "../client/graphqlClient.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
+// TypeScript interfaces for asset resource response
+interface AssetResourcePagination {
+  limit: number;
+  current: string | null;
+  next: string | null;
+  page: string;
+}
+
+interface AssetResourcesResponse {
+  items: any[]; // The actual asset data structure varies based on requested fields
+  pagination: AssetResourcePagination;
+  total: number;
+}
+
+interface SiteAssetResourcesResponse {
+  site: {
+    assetResources: AssetResourcesResponse;
+  };
+}
+
 // Define the schema for the tool parameters
 export const getAssetsResourcesSchema = {
   siteId: z.string().describe("ID of the site containing the assets"),
@@ -19,7 +39,6 @@ export const getAssetsResourcesSchema = {
         "You can also provide specific individual fields like 'key' or 'assetBasicInfo.name'.",
     ),
   cursor: z.string().optional().describe("Cursor for pagination"),
-  page: z.enum(["FIRST", "PREV", "NEXT", "LAST"]).optional().describe("Page direction for cursor-based pagination"),
 };
 
 // Implementation of the get-assets-resources tool
@@ -29,7 +48,6 @@ export const getAssetsResourcesHandler = async ({
   filters,
   fields = [],
   cursor,
-  page,
 }: z.infer<
   z.ZodSchema<{
     siteId: string;
@@ -37,7 +55,6 @@ export const getAssetsResourcesHandler = async ({
     filters?: string;
     fields?: string[];
     cursor?: string;
-    page?: "FIRST" | "PREV" | "NEXT" | "LAST";
   }>
 >): Promise<CallToolResult> => {
   // Define default fields to query if none specified
@@ -81,6 +98,7 @@ export const getAssetsResourcesHandler = async ({
   // Use user-specified fields or defaults, and expand them using buildFieldQuery
   const fieldsToQuery = fields.length > 0 ? fields.flatMap(buildFieldQuery) : defaultFields.flatMap(buildFieldQuery);
 
+  const page = cursor ? "NEXT" : "FIRST"; // If cursor is provided, we don't use page number
   // Prepare pagination input
   let paginationInput = "";
   if (cursor || page) {
@@ -117,7 +135,8 @@ export const getAssetsResourcesHandler = async ({
 
   try {
     const client = createGraphQLClient();
-    const response = await client.request(query);
+    const response = await client.request<SiteAssetResourcesResponse>(query);
+
     return {
       content: [
         {
@@ -125,6 +144,7 @@ export const getAssetsResourcesHandler = async ({
           text: JSON.stringify(response, null, 2),
         },
       ],
+      nextCursor: response.site.assetResources.pagination.next || undefined,
     };
   } catch (error) {
     return {
