@@ -98,27 +98,44 @@ export const getAssetsResourcesHandler = async ({
   // Use user-specified fields or defaults, and expand them using buildFieldQuery
   const fieldsToQuery = fields.length > 0 ? fields.flatMap(buildFieldQuery) : defaultFields.flatMap(buildFieldQuery);
 
-  const page = cursor ? "NEXT" : "FIRST"; // If cursor is provided, we don't use page number
-  // Prepare pagination input
-  let paginationInput = "";
-  if (cursor || page) {
-    paginationInput = "{";
-    if (cursor) paginationInput += `cursor: "${cursor}", `;
-    if (page) paginationInput += `page: ${page}, `;
-    if (limit) paginationInput += `limit: ${limit}`;
-    paginationInput += "}";
-  } else if (limit) {
-    paginationInput = `{ limit: ${limit} }`;
+  // Prepare pagination object
+  const pagination: any = { limit };
+  if (cursor) {
+    pagination.cursor = cursor;
+    pagination.page = "NEXT";
+  } else {
+    pagination.page = "FIRST";
   }
 
-  // Build GraphQL query
+  // Prepare variables for GraphQL query
+  const variables: any = {
+    siteId,
+    fields: fieldsToQuery,
+    assetPagination: pagination,
+  };
+
+  // Only add filters if provided
+  if (filters) {
+    try {
+      variables.filters = JSON.parse(filters);
+    } catch (error) {
+      throw new Error(`Invalid filters JSON: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // Build GraphQL query with variables
   const query = `
-    query GetAssetsResources {
-      site(id: "${siteId}") {
+    query GetAssetsResources(
+      $siteId: String!
+      $fields: [String!]!
+      $assetPagination: AssetPaginationInput
+      $filters: FilterInput
+    ) {
+      site(id: $siteId) {
         assetResources(
-          fields: [${fieldsToQuery.map((field) => `"${field}"`).join(", ")}]
-          ${paginationInput ? `assetPagination: ${paginationInput}` : ""}
-          ${filters ? `filters: ${filters}` : ""}
+          fields: $fields
+          assetPagination: $assetPagination
+          filters: $filters
         ) {
           items
           pagination {
@@ -135,7 +152,7 @@ export const getAssetsResourcesHandler = async ({
 
   try {
     const client = createGraphQLClient();
-    const response = await client.request<SiteAssetResourcesResponse>(query);
+    const response = await client.request<SiteAssetResourcesResponse>(query, variables);
 
     return {
       content: [
