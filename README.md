@@ -2,6 +2,12 @@
 
 An experimental MCP (Model Context Protocol) server for querying the Lansweeper API.
 
+You can:
+
+- Get detailed information about a specific asset
+- Get asset resources from a Lansweeper site
+- Get information about authorized sites
+
 ## Prerequisites
 
 - Node.js (v16 or later)
@@ -93,6 +99,68 @@ You can also run the server directly using npx:
 ```bash
 LANSWEEPER_PERSONAL_ACCESS_TOKEN=your-lansweeper-token npx -y @lansweeper-public/mcp-server-lansweeper
 ```
+
+example of listing the tools:
+
+```bash
+ echo '{"jsonrpc":"2.0","method":"tools/list","id":1}' | yarn dev
+```
+
+### Running as HTTP Server
+
+You can also run the server as an HTTP endpoint for direct integration:
+
+```bash
+# Run on custom port
+LANSWEEPER_PERSONAL_ACCESS_TOKEN=your-lansweeper-token \
+MCP_TRANSPORT_MODE=http \
+MCP_HTTP_PORT=8080 \
+npx -y @lansweeper-public/mcp-server-lansweeper
+```
+
+The HTTP server will be available at `http://localhost:8080/mcp` (or your specified port).
+
+### Docker
+
+You can run the MCP server as an HTTP endpoint using Docker:
+
+#### Building the Docker image
+
+```bash
+docker build -t lansweeper-mcp-server .
+```
+
+#### Running as HTTP server
+
+```bash
+docker run -d --name lansweeper-mcp-server \
+  -p 8080:8080 \
+  -e LANSWEEPER_PERSONAL_ACCESS_TOKEN=your-lansweeper-token \
+  lansweeper-mcp-server
+```
+
+The server will be available at `http://localhost:8080/mcp`
+
+#### Using with MCP HTTP clients
+
+The HTTP endpoint follows the MCP streamable HTTP transport specification. Configure your MCP client to connect to:
+
+- **Endpoint**: `http://localhost:8080/mcp`
+- **Method**: POST for requests, GET for Server-Sent Events
+- **Headers**: Content-Type: application/json
+
+#### Testing the server
+
+You can test the server using curl:
+
+```bash
+ curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc": "2.0", "method": "initialize", "id": 1, "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}}'
+```
+
+> **Note**: The Docker container runs in HTTP mode by default. For stdio mode, set `MCP_TRANSPORT_MODE=stdio` environment variable.
 
 ## Available Tools
 
